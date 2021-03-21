@@ -1,0 +1,90 @@
+name: drupal-cleanroom
+recipe: drupal9
+config:
+  php: "7.4"
+  via: apache:2.4
+  webroot: web
+  database: mysql:5.7
+  drush: ^10
+  xdebug: true
+
+proxy:
+  mailhog:
+    - mail.drupal-cleanroom.lndo.site
+  pma:
+    - pma.drupal-cleanroom.lndo.site
+services:
+  appserver:
+    cmd: drush --root=/app/web
+    build:
+      - "composer global require drupal/coder"
+      - "/app/vendor/bin/phpcs --config-set installed_paths /app/vendor/drupal/coder/coder_sniffer"
+    config:
+      php: ./lando_config/php.ini
+    overrides:
+      environment:
+        SIMPLETEST_BASE_URL: "http://appserver"
+        SIMPLETEST_DB: "sqlite://localhost/tmp/db.sqlite"
+        MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", {"browserName":"chrome","chromeOptions":{"args":["--disable-gpu","--headless", "--no-sandbox"]}}, "http://chrome:9515"]'
+        DRUSH_OPTIONS_ROOT: "/app/web"
+        DRUSH_OPTIONS_URI: "http://drupal-cleanroom.lndo.site" # Change projectname to the same as the name key above.
+  pma:
+    type: phpmyadmin
+    hosts:
+      - database
+  nodejs:
+    type: node:12
+    ssl: false
+    globals:
+      gulp-cli: latest
+  mailhog:
+    type: mailhog
+    hogfrom:
+      - appserver
+tooling:
+  node:
+    service: nodejs
+  npm:
+    service: nodejs
+  npx:
+    service: nodejs
+  yarn:
+    service: nodejs
+  nano:
+    service: appserver
+  drush:
+    service: appserver
+    cmd: drush --root=/app/web
+  drupalcs:
+    service: appserver
+    cmd: "/app/vendor/bin/phpcs --standard=Drupal,DrupalPractice"
+    description: Run phpcs Drupal Coding Standards against a given file or directory.
+  drupalcbf:
+    service: appserver
+    cmd: "/app/vendor/bin/phpcbf --standard=Drupal"
+    description: Automatically fix Drupal coding standards suggestions.
+  phpunit:
+    service: appserver
+    cmd: "/app/vendor/bin/phpunit --debug --configuration /app/phpunit.xml"
+    description: Run PHPUnit tests on a specific file or Drupal module.
+  drupal-check:
+    service: appserver
+    cmd: vendor/bin/drupal-check -ad
+    description: Check Drupal code for deprecations and discover bugs via static analysis.
+  xdebug-on:
+    service: appserver
+    description: Enable xdebug for Apache.
+    cmd: docker-php-ext-enable xdebug && /etc/init.d/apache2 reload && echo "Enabling xdebug"
+    user: root
+  xdebug-off:
+    service: appserver
+    description: Disable xdebug for Apache.
+    cmd: rm /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini && /etc/init.d/apache2 reload && echo "Disabling xdebug"
+    user: root
+  phpunitdebug:
+    service: appserver
+    cmd: php -d xdebug.remote_port=9003 vendor/bin/phpunit --debug --verbose
+
+events:
+  pre-start:
+    - appserver: composer install
