@@ -6,8 +6,9 @@ config:
   webroot: web
   database: mysql:5.7
   drush: ^10
-  xdebug: true
-
+stats:
+  - report: false
+    url: https://metrics.lando.dev
 proxy:
   mailhog:
     - mail.drupal-cleanroom.lndo.site
@@ -20,6 +21,7 @@ services:
       - "composer global require drupal/coder"
       - "/app/vendor/bin/phpcs --config-set installed_paths /app/vendor/drupal/coder/coder_sniffer"
     config:
+      xdebug: true
       php: ./lando_config/php.ini
     overrides:
       environment:
