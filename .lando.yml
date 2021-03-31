@@ -1,4 +1,4 @@
-name: drupal-cleanroom
+name: APP_NAME_PLACEHOLDER
 recipe: drupal9
 config:
   php: "7.4"
@@ -11,9 +11,9 @@ stats:
     url: https://metrics.lando.dev
 proxy:
   mailhog:
-    - mail.drupal-cleanroom.lndo.site
+    - mail.APP_NAME_PLACEHOLDER.lndo.site # Change APP_NAME_PLACEHOLDER to the same as the name key above.
   pma:
-    - pma.drupal-cleanroom.lndo.site
+    - pma.APP_NAME_PLACEHOLDER.lndo.site # Change APP_NAME_PLACEHOLDER to the same as the name key above.
 services:
   appserver:
     cmd: drush --root=/app/web
@@ -29,7 +29,7 @@ services:
         SIMPLETEST_DB: "sqlite://localhost/tmp/db.sqlite"
         MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", {"browserName":"chrome","chromeOptions":{"args":["--disable-gpu","--headless", "--no-sandbox"]}}, "http://chrome:9515"]'
         DRUSH_OPTIONS_ROOT: "/app/web"
-        DRUSH_OPTIONS_URI: "http://drupal-cleanroom.lndo.site" # Change projectname to the same as the name key above.
+        DRUSH_OPTIONS_URI: "http://APP_NAME_PLACEHOLDER.lndo.site" # Change APP_NAME_PLACEHOLDER to the same as the name key above.
   pma:
     type: phpmyadmin
     hosts:
