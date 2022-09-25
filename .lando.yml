@@ -5,7 +5,7 @@ config:
   via: apache:2.4
   webroot: web
   database: mysql:5.7
-  drush: ^10
+  drush: ^11
 stats:
   - report: false
     url: https://metrics.lando.dev
@@ -35,7 +35,7 @@ services:
     hosts:
       - database
   nodejs:
-    type: node:12
+    type: node:16
     ssl: false
     globals:
       gulp-cli: latest
